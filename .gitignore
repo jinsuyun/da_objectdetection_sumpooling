@@ -116,5 +116,5 @@ tools/
 **/*.txt
 *.txt
 *.xml
-DA_Faster_ICR_CCR/data/
-SW_Faster_ICR_CCR/data/
+DA_Faster_ICR_CCR/data
+SW_Faster_ICR_CCR/data
