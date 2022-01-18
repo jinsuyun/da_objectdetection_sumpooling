@@ -107,5 +107,14 @@ venv.bak/
 
 # specified for this repo
 tools/
-
+**/*.pth
 *.pth
+*.png
+**/*.png
+*.jpg
+**/*.jpg
+**/*.txt
+*.txt
+*.xml
+DA_Faster_ICR_CCR/data/
+SW_Faster_ICR_CCR/data/
