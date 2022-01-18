@@ -1,0 +1,56 @@
+<annotation>
+	<folder>VOC2007</folder>
+	<filename>target_lindau_000052_000019_leftImg8bit_foggy_beta_0.02.jpg</filename>
+	<source>
+		<database>The VOC2007 Database</database>
+		<annotation>PASCAL VOC2007</annotation>
+		<image>flickr</image>
+		<flickrid>0</flickrid>
+	</source>
+	<owner>
+		<flickrid>rtz</flickrid>
+		<name>?</name>
+	</owner>
+	<size>
+		<width>2048</width>
+		<height>1024</height>
+		<deep>3</deep>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>car</name>
+		<pose>Frontal</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1591</xmin>
+			<ymin>393</ymin>
+			<xmax>1753</xmax>
+			<ymax>482</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>bicycle</name>
+		<pose>Frontal</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1879</xmin>
+			<ymin>433</ymin>
+			<xmax>1985</xmax>
+			<ymax>512</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>rider</name>
+		<pose>Frontal</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1903</xmin>
+			<ymin>383</ymin>
+			<xmax>1968</xmax>
+			<ymax>500</ymax>
+		</bndbox>
+	</object>
+</annotation>

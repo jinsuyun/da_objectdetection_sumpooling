@@ -20,7 +20,7 @@ from torch.autograd import Variable
 class _fasterRCNN(nn.Module):
     """ faster RCNN """
 
-    def __init__(self, classes, class_agnostic, lc, gc):
+    def __init__(self, classes, class_agnostic, lc, gc,ce,grl):
         super(_fasterRCNN, self).__init__()
         self.classes = classes
         self.n_classes = len(classes)
@@ -30,6 +30,8 @@ class _fasterRCNN(nn.Module):
         self.RCNN_loss_bbox = 0
         self.lc = lc
         self.gc = gc
+        self.ce = ce
+        self.grl = grl
         # define rpn
         self.RCNN_rpn = _RPN(self.dout_base_model)
         self.RCNN_proposal_target = _ProposalTargetLayer(self.n_classes)
@@ -47,8 +49,12 @@ class _fasterRCNN(nn.Module):
         # self.bn1 = nn.BatchNorm2d(self.dout_base_model, momentum=0.01)
         # self.bn2 = nn.BatchNorm2d(self.n_classes-1, momentum=0.01)
 
+    #Megvii
+    # def forward(
+    #     self, im_data, im_info, im_cls_lb, gt_boxes, num_boxes, target=False, eta=1.0
+    # ):
     def forward(
-        self, im_data, im_info, im_cls_lb, gt_boxes, num_boxes, target=False, eta=1.0
+            self, im_data, im_info,  gt_boxes, num_boxes, target=False, eta=1.0
     ):
         batch_size = im_data.size(0)
 
@@ -79,11 +85,23 @@ class _fasterRCNN(nn.Module):
         rois, rpn_loss_cls, rpn_loss_bbox = self.RCNN_rpn(
             base_feat, im_info, gt_boxes, num_boxes
         )
+
+        if self.grl:
+            projection = torch.sum(base_feat,dim=3).unsqueeze(dim=3)
+
+            domain_p_grl, _ = self.netD_grl(grad_reverse(projection, lambd=eta))
+            if target:
+                return d_pixel_grl, domain_p_grl  # , diff
+            _, feat_grl = self.netD_grl(base_feat.detach())
+        # else:
+        #     domain_p_grl = self.netD_grl(grad_reverse(base_feat, lambd=eta))
+        #     if target:
+        #         return d_pixel_grl, domain_p_grl  # ,diff
         # supervise base feature map with category level label
-        cls_feat = self.avg_pool(base_feat)
-        cls_feat = self.conv_lst(cls_feat).squeeze(-1).squeeze(-1)
+        # cls_feat = self.avg_pool(base_feat) #Megvii
+        # cls_feat = self.conv_lst(cls_feat).squeeze(-1).squeeze(-1) #Megvii
         # cls_feat = self.conv_lst(self.bn1(self.avg_pool(base_feat))).squeeze(-1).squeeze(-1)
-        category_loss_cls = nn.BCEWithLogitsLoss()(cls_feat, im_cls_lb)
+        # category_loss_cls = nn.BCEWithLogitsLoss()(cls_feat, im_cls_lb) #Megvii
 
         # if it is training phrase, then use ground trubut bboxes for refining
         if self.training:
@@ -122,6 +140,9 @@ class _fasterRCNN(nn.Module):
             feat = feat.view(1, -1).repeat(pooled_feat.size(0), 1)
             pooled_feat = torch.cat((feat, pooled_feat), 1)
             # compute bbox offset
+        if self.grl:
+            feat_grl = feat_grl.view(1, -1).repeat(pooled_feat.size(0), 1)
+            pooled_feat = torch.cat((feat_grl, pooled_feat), 1)
 
         # compute bbox offset
         bbox_pred = self.RCNN_bbox_pred(pooled_feat)
@@ -157,19 +178,37 @@ class _fasterRCNN(nn.Module):
         cls_prob = cls_prob.view(batch_size, rois.size(1), -1)
         bbox_pred = bbox_pred.view(batch_size, rois.size(1), -1)
 
-        return (
+
+        return_list = [
             rois,
             cls_prob,
             bbox_pred,
-            category_loss_cls,
             rpn_loss_cls,
             rpn_loss_bbox,
             RCNN_loss_cls,
             RCNN_loss_bbox,
             rois_label,
             d_pixel,
-            domain_p,
-        )  # ,diff
+            domain_p]
+
+        if self.grl:
+            return_list.append(d_pixel_grl)
+            return_list.append(domain_p_grl)
+
+        return return_list
+        # return (
+        #     rois,
+        #     cls_prob,
+        #     bbox_pred,
+        #     # category_loss_cls, #Megvii
+        #     rpn_loss_cls,
+        #     rpn_loss_bbox,
+        #     RCNN_loss_cls,
+        #     RCNN_loss_bbox,
+        #     rois_label,
+        #     d_pixel,
+        #     domain_p,
+        # )  # ,diff
 
     def _init_weights(self):
         def normal_init(m, mean, stddev, truncated=False):

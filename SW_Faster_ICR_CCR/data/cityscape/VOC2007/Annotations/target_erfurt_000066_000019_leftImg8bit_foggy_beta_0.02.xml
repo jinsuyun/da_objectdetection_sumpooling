@@ -1,0 +1,56 @@
+<annotation>
+	<folder>VOC2007</folder>
+	<filename>target_erfurt_000066_000019_leftImg8bit_foggy_beta_0.02.jpg</filename>
+	<source>
+		<database>The VOC2007 Database</database>
+		<annotation>PASCAL VOC2007</annotation>
+		<image>flickr</image>
+		<flickrid>0</flickrid>
+	</source>
+	<owner>
+		<flickrid>rtz</flickrid>
+		<name>?</name>
+	</owner>
+	<size>
+		<width>2048</width>
+		<height>1024</height>
+		<deep>3</deep>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>train</name>
+		<pose>Frontal</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1</xmin>
+			<ymin>73</ymin>
+			<xmax>1980</xmax>
+			<ymax>627</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>person</name>
+		<pose>Frontal</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1749</xmin>
+			<ymin>215</ymin>
+			<xmax>1994</xmax>
+			<ymax>825</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>person</name>
+		<pose>Frontal</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>97</xmin>
+			<ymin>269</ymin>
+			<xmax>346</xmax>
+			<ymax>811</ymax>
+		</bndbox>
+	</object>
+</annotation>

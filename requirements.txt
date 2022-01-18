@@ -1,0 +1,18 @@
+certifi==2021.5.30
+cycler==0.10.0
+Cython==0.29.23
+easydict==1.9
+-e git+https://github.com/Megvii-Nanjing/CR-DA-DET.git@5a6ebbecef6e516fa9944573afc29fb554b02f85#egg=faster_rcnn&subdirectory=SW_Faster_ICR_CCR/lib
+kiwisolver==1.3.1
+matplotlib==3.3.4
+numpy==1.19.5
+opencv-python==4.5.3.56
+Pillow==8.3.1
+pycocotools==2.0.2
+pyparsing==2.4.7
+python-dateutil==2.8.1
+PyYAML==5.4.1
+scipy==1.5.4
+six==1.16.0
+torch==1.0.0
+torchvision==0.2.1

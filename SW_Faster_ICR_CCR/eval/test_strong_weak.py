@@ -18,7 +18,7 @@ from model.da_faster_rcnn.resnet import resnet
 from model.da_faster_rcnn.vgg16 import vgg16
 
 # from model.faster_rcnn.vgg16 import vgg16
-from model.faster_rcnn.resnet import resnet
+from model.da_faster_rcnn.resnet import resnet
 
 # from model.nms.nms_wrapper import nms
 from model.roi_layers import nms
@@ -175,6 +175,20 @@ def parse_args():
         "--gc",
         dest="gc",
         help="whether use context vector for global level",
+        action="store_true",
+    )
+
+    parser.add_argument(
+        "--ce",
+        dest="ce",
+        help="whether change l2 loss to cross entropy loss",
+        action="store_true",
+    )
+
+    parser.add_argument(
+        "--grl",
+        dest="grl",
+        help="whether add grl for projection",
         action="store_true",
     )
     # resume trained model
@@ -366,6 +380,8 @@ if __name__ == "__main__":
             class_agnostic=args.class_agnostic,
             lc=args.lc,
             gc=args.gc,
+            ce=args.ce,
+            grl=args.grl,
         )
     elif args.net == "res101":
         fasterRCNN = resnet(
@@ -376,6 +392,8 @@ if __name__ == "__main__":
             class_agnostic=args.class_agnostic,
             lc=args.lc,
             gc=args.gc,
+            ce=args.ce,
+            grl=args.grl,
         )
     elif args.net == "res50":
         fasterRCNN = resnet(
@@ -395,7 +413,7 @@ if __name__ == "__main__":
     print("load checkpoint %s" % (load_name))
     checkpoint = torch.load(load_name)
     fasterRCNN.load_state_dict(
-        {k: v for k, v in checkpoint["model"].items() if k in fasterRCNN.state_dict()}
+        {k: v for k, v in checkpoint["model"].items() if k in fasterRCNN.state_dict()},strict=False
     )
     # fasterRCNN.load_state_dict(checkpoint['model'])
     if "pooling_mode" in checkpoint.keys():
@@ -471,19 +489,40 @@ if __name__ == "__main__":
         num_boxes.data.resize_(data[3].size()).copy_(data[3])
 
         det_tic = time.time()
+
+
         with torch.no_grad():
-            (
-                rois,
-                cls_prob,
-                bbox_pred,
-                rpn_loss_cls,
-                rpn_loss_box,
-                RCNN_loss_cls,
-                RCNN_loss_bbox,
-                rois_label,
-                d_pixel,
-                domain_p,
-            ) = fasterRCNN(im_data, im_info, gt_boxes, num_boxes)
+            if args.grl:
+                (
+                    rois,
+                    cls_prob,
+                    bbox_pred,
+                    rpn_loss_cls,
+                    rpn_loss_box,
+                    RCNN_loss_cls,
+                    RCNN_loss_bbox,
+                    rois_label,
+                    d_pixel,
+                    domain_p,
+                    d_pixel_grl,
+                    projection_grl,
+
+                ) = fasterRCNN(im_data, im_info, gt_boxes, num_boxes)
+            else:
+                (
+                    rois,
+                    cls_prob,
+                    bbox_pred,
+                    rpn_loss_cls,
+                    rpn_loss_box,
+                    RCNN_loss_cls,
+                    RCNN_loss_bbox,
+                    rois_label,
+                    d_pixel,
+                    domain_p,
+
+                ) = fasterRCNN(im_data, im_info, gt_boxes, num_boxes)
+
 
         scores = cls_prob.data
         boxes = rois.data[:, :, 1:5]

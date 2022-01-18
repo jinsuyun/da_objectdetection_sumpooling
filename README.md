@@ -23,7 +23,7 @@ The usage of SW-ICR-CCR is same to DA-ICR-CCR. Take DA-ICR-CCR as an example:
 cd DA_Faster_ICR_CCR/lib
 python setup.py build develop
 # to train DA-Faster-ICR-CCR on cityscape:
-sh train_cityscape.sh
+sh train_cityscape_vgg16_megvii.sh
 # To validate DA-Faster-ICR-CCR on cityscape:
 python test_cityscape.py
 ```

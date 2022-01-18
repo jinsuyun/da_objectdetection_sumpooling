@@ -34,7 +34,7 @@ from roi_da_data_layer.roidb import combined_roidb
 from torch.autograd import Variable
 from torch.utils.data.sampler import Sampler
 
-
+# os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 def infinite_data_loader(data_loader):
     while True:
@@ -463,6 +463,7 @@ if __name__ == "__main__":
         tgt_gt_boxes = tgt_gt_boxes.cuda()
         tgt_need_backprop = tgt_need_backprop.cuda()
 
+
     # make variable
     im_data = Variable(im_data)
     im_info = Variable(im_info)
@@ -478,9 +479,9 @@ if __name__ == "__main__":
     tgt_gt_boxes = Variable(tgt_gt_boxes)
     tgt_need_backprop = Variable(tgt_need_backprop)
 
-    if args.cuda:
-        cfg.CUDA = True
-
+    # if args.cuda:
+    #     cfg.CUDA = True
+    # device = torch.device("cuda:0")
     # initilize the network here.
     if args.net == "vgg16":
         fasterRCNN = vgg16(
@@ -553,7 +554,12 @@ if __name__ == "__main__":
         print("loaded checkpoint %s" % (load_name))
 
     if args.cuda:
-        fasterRCNN.cuda()
+        # if torch.cuda.device_count()>1:
+        #
+        #     fasterRCNN = nn.DataParallel(fasterRCNN,device_ids=[0,1,2])
+        fasterRCNN = fasterRCNN.cuda()
+
+
 
     data_iter = iter(s_dataloader)
     tgt_data_iter = iter(t_dataloader)
@@ -634,20 +640,20 @@ if __name__ == "__main__":
             )
 
             loss = (
-                img_cls_loss.mean()
-                + rpn_loss_cls.mean()
-                + rpn_loss_box.mean()
-                + RCNN_loss_cls.mean()
-                + RCNN_loss_bbox.mean()
-                + args.lamda
-                * (
-                    DA_img_loss_cls.mean()
-                    + DA_ins_loss_cls.mean()
-                    + tgt_DA_img_loss_cls.mean()
-                    + tgt_DA_ins_loss_cls.mean()
-                    + DA_cst_loss.mean()
-                    + tgt_DA_cst_loss.mean()
-                )
+                    img_cls_loss.mean()
+                    + rpn_loss_cls.mean()
+                    + rpn_loss_box.mean()
+                    + RCNN_loss_cls.mean()
+                    + RCNN_loss_bbox.mean()
+                    + args.lamda
+                    * (
+                            DA_img_loss_cls.mean()
+                            + DA_ins_loss_cls.mean()
+                            + tgt_DA_img_loss_cls.mean()
+                            + tgt_DA_ins_loss_cls.mean()
+                            + DA_cst_loss.mean()
+                            + tgt_DA_cst_loss.mean()
+                    )
             )
             loss_temp += loss.item()
 
@@ -686,10 +692,10 @@ if __name__ == "__main__":
 
                 print(
                     "[session %d][epoch %2d][iter %4d/%4d] loss: %.4f, lr: %.2e"
-                    % (args.session, epoch, step, args.max_iter, loss_temp, lr)
+                    % (args.session, epoch, step, args.max_iter, loss_temp, lr),flush=True
                 )
                 print(
-                    "\t\t\tfg/bg=(%d/%d), time cost: %f" % (fg_cnt, bg_cnt, end - start)
+                    "\t\t\tfg/bg=(%d/%d), time cost: %f" % (fg_cnt, bg_cnt, end - start),flush=True
                 )
                 print(
                     "\t\t\tcategory_cls: %.4f, rpn_cls: %.4f, rpn_box: %.4f, rcnn_cls: %.4f, rcnn_box %.4f,\n\t\t\timg_loss %.4f,ins_loss %.4f,,cst_loss %.4f"
@@ -702,7 +708,7 @@ if __name__ == "__main__":
                         loss_DA_img_cls,
                         loss_DA_ins_cls,
                         loss_DA_cst,
-                    )
+                    ),flush=True
                 )
 
                 loss_temp = 0
@@ -723,4 +729,4 @@ if __name__ == "__main__":
                 },
                 save_name,
             )
-            print("save model: {}".format(save_name))
+            print("save model: {}".format(save_name),flush=True)

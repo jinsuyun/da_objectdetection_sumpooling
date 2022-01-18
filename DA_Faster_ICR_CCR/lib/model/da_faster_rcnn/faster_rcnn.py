@@ -3,8 +3,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as models
-from model.da_faster_rcnn.DA import _ImageDA, _InstanceDA
+from model.da_faster_rcnn.DA import _ImageDA, _InstanceDA, _ImageDA_grl
 from model.roi_layers import ROIAlign, ROIPool
+# from model.roi_crop.modules.roi_crop import _RoICrop
 from model.rpn.proposal_target_layer_cascade import _ProposalTargetLayer
 from model.rpn.rpn import _RPN
 from model.utils.config import cfg
@@ -20,7 +21,7 @@ from torch.autograd import Variable
 class _fasterRCNN(nn.Module):
     """ faster RCNN """
 
-    def __init__(self, classes, class_agnostic, in_channel=4096):
+    def __init__(self, classes, class_agnostic, in_channel=4096, grl=False):
         super(_fasterRCNN, self).__init__()
         self.classes = classes
         self.n_classes = len(classes)
@@ -28,7 +29,6 @@ class _fasterRCNN(nn.Module):
         # loss
         self.RCNN_loss_cls = 0
         self.RCNN_loss_bbox = 0
-
         # define rpn
         self.RCNN_rpn = _RPN(self.dout_base_model)
         self.RCNN_proposal_target = _ProposalTargetLayer(self.n_classes)
@@ -46,23 +46,26 @@ class _fasterRCNN(nn.Module):
 
         self.RCNN_imageDA = _ImageDA(self.dout_base_model)
         self.RCNN_instanceDA = _InstanceDA(in_channel)
+        self.RCNN_imageDA_grl = _ImageDA_grl(self.dout_base_model)
         self.consistency_loss = torch.nn.MSELoss(size_average=False)
         self.conv_lst = nn.Conv2d(self.dout_base_model, self.n_classes - 1, 1, 1, 0)
         self.avg_pool = nn.AdaptiveAvgPool2d(output_size=(1, 1))
 
+        self.grl = grl
+
     def forward(
-        self,
-        im_data,
-        im_info,
-        im_cls_lb,
-        gt_boxes,
-        num_boxes,
-        need_backprop,
-        tgt_im_data,
-        tgt_im_info,
-        tgt_gt_boxes,
-        tgt_num_boxes,
-        tgt_need_backprop,
+            self,
+            im_data,
+            im_info,
+            im_cls_lb,
+            gt_boxes,
+            num_boxes,
+            need_backprop,
+            tgt_im_data,
+            tgt_im_info,
+            tgt_gt_boxes,
+            tgt_num_boxes,
+            tgt_need_backprop,
     ):
 
         if not (need_backprop.detach() == 1 and tgt_need_backprop.detach() == 0):
@@ -112,6 +115,14 @@ class _fasterRCNN(nn.Module):
 
         rois = Variable(rois)
         # do roi pooling based on predicted rois
+        if cfg.POOLING_MODE == 'crop':
+            # pdb.set_trace()
+            # pooled_feat_anchor = _crop_pool_layer(base_feat, rois.view(-1, 5))
+            grid_xy = _affine_grid_gen(rois.view(-1, 5), base_feat.size()[2:], self.grid_size)
+            grid_yx = torch.stack([grid_xy.data[:, :, :, 1], grid_xy.data[:, :, :, 0]], 3).contiguous()
+            pooled_feat = self.RCNN_roi_crop(base_feat, Variable(grid_yx).detach())
+            if cfg.CROP_RESIZE_WITH_MAX_POOL:
+                pooled_feat = F.max_pool2d(pooled_feat, 2, 2)
 
         if cfg.POOLING_MODE == "align":
             pooled_feat = self.RCNN_roi_align(base_feat, rois.view(-1, 5))
@@ -222,6 +233,20 @@ class _fasterRCNN(nn.Module):
 
         base_score, base_label = self.RCNN_imageDA(base_feat, need_backprop)
 
+        if self.grl:
+            projection = torch.sum(base_feat, dim=2).unsqueeze(dim=2)
+            projection2 = torch.sum(base_feat, dim=3).unsqueeze(dim=3)
+            sum_pooling = torch.matmul(projection2, projection)
+            base_score_grl, base_label_grl = self.RCNN_imageDA_grl(projection, need_backprop)
+            base_prob_grl = F.log_softmax(base_score_grl, dim=1)
+            DA_img_loss_cls_grl = F.nll_loss(base_prob_grl, base_label_grl)
+
+            """matmul loss  consistency loss"""
+            matmul_consistency_prob = base_feat
+            matmul_consistency_prob = torch.mean(matmul_consistency_prob)
+            matmul_consistency_prob = matmul_consistency_prob.repeat(projection.size())
+            matmul_DA_cst_loss = self.consistency_loss(projection, matmul_consistency_prob.detach())
+
         # Image DA
         base_prob = F.log_softmax(base_score, dim=1)
         DA_img_loss_cls = F.nll_loss(base_prob, base_label)
@@ -245,6 +270,26 @@ class _fasterRCNN(nn.Module):
             tgt_base_feat, tgt_need_backprop
         )
 
+        if self.grl:
+            tgt_projection = torch.sum(tgt_base_feat, dim=2).unsqueeze(dim=2)
+            tgt_projection2 = torch.sum(tgt_base_feat, dim=3).unsqueeze(dim=3)
+            tgt_sum_pooling = torch.matmul(tgt_projection2, tgt_projection)
+            # tgt_base_score_grl, tgt_base_label_grl = self.RCNN_imageDA_grl(
+            #     tgt_sum_pooling, tgt_need_backprop
+            # )
+            tgt_base_score_grl, tgt_base_label_grl = self.RCNN_imageDA_grl(
+                tgt_projection, tgt_need_backprop
+            )
+            tgt_base_prob_grl = F.log_softmax(tgt_base_score_grl, dim=1)
+            tgt_DA_img_loss_cls_grl = F.nll_loss(tgt_base_prob_grl, tgt_base_label_grl)
+
+            """target matmul  consistency loss"""
+
+            matmul_tgt_consistency_prob = tgt_base_feat
+            matmul_tgt_consistency_prob = torch.mean(matmul_tgt_consistency_prob)
+            matmul_tgt_consistency_prob = matmul_tgt_consistency_prob.repeat(tgt_projection.size())
+            matmul_tgt_DA_cst_loss = self.consistency_loss(tgt_projection, matmul_tgt_consistency_prob.detach())
+
         # Image DA
         tgt_base_prob = F.log_softmax(tgt_base_score, dim=1)
         tgt_DA_img_loss_cls = F.nll_loss(tgt_base_prob, tgt_base_label)
@@ -266,23 +311,51 @@ class _fasterRCNN(nn.Module):
             tgt_instance_sigmoid, tgt_consistency_prob.detach()
         )
 
-        return (
-            rois,
-            cls_prob,
-            bbox_pred,
-            img_cls_loss,
-            rpn_loss_cls,
-            rpn_loss_bbox,
-            RCNN_loss_cls,
-            RCNN_loss_bbox,
-            rois_label,
-            DA_img_loss_cls,
-            DA_ins_loss_cls,
-            tgt_DA_img_loss_cls,
-            tgt_DA_ins_loss_cls,
-            DA_cst_loss,
-            tgt_DA_cst_loss,
-        )
+
+
+        return_list = [rois,
+                       cls_prob,
+                       bbox_pred,
+                       img_cls_loss,
+                       rpn_loss_cls,
+                       rpn_loss_bbox,
+                       RCNN_loss_cls,
+                       RCNN_loss_bbox,
+                       rois_label,
+                       DA_img_loss_cls,
+                       DA_ins_loss_cls,
+                       tgt_DA_img_loss_cls,
+                       tgt_DA_ins_loss_cls,
+                       DA_cst_loss,
+                       tgt_DA_cst_loss]
+
+        if self.grl:
+            return_list.append(DA_img_loss_cls_grl)
+            return_list.append(tgt_DA_img_loss_cls_grl)
+            return_list.append(matmul_DA_cst_loss)
+            return_list.append(matmul_tgt_DA_cst_loss)
+        # else:
+        #     return_list.append(None)
+        #     return_list.append(None)
+
+        return return_list
+        # return (
+        #     rois,
+        #     cls_prob,
+        #     bbox_pred,
+        #     img_cls_loss,
+        #     rpn_loss_cls,
+        #     rpn_loss_bbox,
+        #     RCNN_loss_cls,
+        #     RCNN_loss_bbox,
+        #     rois_label,
+        #     DA_img_loss_cls,
+        #     DA_ins_loss_cls,
+        #     tgt_DA_img_loss_cls,
+        #     tgt_DA_ins_loss_cls,
+        #     DA_cst_loss,
+        #     tgt_DA_cst_loss,
+        # )
 
     def _init_weights(self):
         def normal_init(m, mean, stddev, truncated=False):
@@ -306,6 +379,10 @@ class _fasterRCNN(nn.Module):
         normal_init(self.conv_lst, 0, 0.01, cfg.TRAIN.TRUNCATED)
         normal_init(self.RCNN_imageDA.Conv1, 0, 0.01, cfg.TRAIN.TRUNCATED)
         normal_init(self.RCNN_imageDA.Conv2, 0, 0.01, cfg.TRAIN.TRUNCATED)
+
+        normal_init(self.RCNN_imageDA_grl.Conv1, 0, 0.01, cfg.TRAIN.TRUNCATED)
+        normal_init(self.RCNN_imageDA_grl.Conv2, 0, 0.01, cfg.TRAIN.TRUNCATED)
+
         normal_init(self.RCNN_instanceDA.dc_ip1, 0, 0.01, cfg.TRAIN.TRUNCATED)
         normal_init(self.RCNN_instanceDA.dc_ip2, 0, 0.01, cfg.TRAIN.TRUNCATED)
         normal_init(self.RCNN_instanceDA.clssifer, 0, 0.05, cfg.TRAIN.TRUNCATED)

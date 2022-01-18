@@ -1,0 +1,44 @@
+<annotation>
+	<folder>VOC2007</folder>
+	<filename>source_jena_000002_000019_leftImg8bit.jpg</filename>
+	<source>
+		<database>The VOC2007 Database</database>
+		<annotation>PASCAL VOC2007</annotation>
+		<image>flickr</image>
+		<flickrid>0</flickrid>
+	</source>
+	<owner>
+		<flickrid>rtz</flickrid>
+		<name>?</name>
+	</owner>
+	<size>
+		<width>2048</width>
+		<height>1024</height>
+		<deep>3</deep>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>car</name>
+		<pose>Frontal</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>985</xmin>
+			<ymin>412</ymin>
+			<xmax>1074</xmax>
+			<ymax>481</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>car</name>
+		<pose>Frontal</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1061</xmin>
+			<ymin>417</ymin>
+			<xmax>1091</xmax>
+			<ymax>470</ymax>
+		</bndbox>
+	</object>
+</annotation>

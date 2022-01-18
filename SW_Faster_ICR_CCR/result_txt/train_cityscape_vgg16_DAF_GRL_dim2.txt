@@ -1,0 +1,144 @@
+/mnt/data2/JINSU/CR-DA-DET/SW_Faster_ICR_CCR/lib/model/utils/config.py:377: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
+  yaml_cfg = edict(yaml.load(f))
+/home/say2dbs/anaconda3/envs/DAF/lib/python3.6/site-packages/torch/nn/functional.py:1332: UserWarning: nn.functional.sigmoid is deprecated. Use torch.sigmoid instead.
+  warnings.warn("nn.functional.sigmoid is deprecated. Use torch.sigmoid instead.")
+/mnt/data2/JINSU/CR-DA-DET/SW_Faster_ICR_CCR
+['/mnt/data2/JINSU/CR-DA-DET/SW_Faster_ICR_CCR/data/coco/PythonAPI', '/mnt/data2/JINSU/CR-DA-DET/SW_Faster_ICR_CCR', '/home/say2dbs/anaconda3/envs/DAF/lib/python36.zip', '/home/say2dbs/anaconda3/envs/DAF/lib/python3.6', '/home/say2dbs/anaconda3/envs/DAF/lib/python3.6/lib-dynload', '/home/say2dbs/anaconda3/envs/DAF/lib/python3.6/site-packages', '/mnt/data2/JINSU/CR-DA-DET/SW_Faster_ICR_CCR/lib']
+Called with args:
+Namespace(batch_size=1, ce=False, checkpoint_interval=1, class_agnostic=False, cuda=True, dataset='cityscape', disp_interval=100, ef=False, eta=0.1, gamma=5, gc=True, grl=True, instance_da_eta=0.1, lamda=0.1, large_scale=False, lc=True, lr=0.0001, lr_decay_gamma=0.1, lr_decay_step=5, max_epochs=12, max_iter=10000, model_name='', net='vgg16', num_workers=0, optimizer='sgd', pretrained_path='/mnt/data2/JINSU/CR-DA-DET/DA_Faster_ICR_CCR/pre_trained_model/vgg16_caffe.pth', resume=False, resume_name='', save_dir='/mnt/data2/JINSU/CR-DA-DET/SW_Faster_ICR_CCR/cityscape_model/model_vgg16_DAF_GRL_dim2', session=1, start_epoch=1)
+loading our dataset...........
+Using config:
+{'ANCHOR_RATIOS': [0.5, 1, 2],
+ 'ANCHOR_SCALES': [8, 16, 32],
+ 'CROP_RESIZE_WITH_MAX_POOL': False,
+ 'CUDA': False,
+ 'DATA_DIR': '/mnt/data2/JINSU/CR-DA-DET/SW_Faster_ICR_CCR/data',
+ 'DEDUP_BOXES': 0.0625,
+ 'EPS': 1e-14,
+ 'EXP_DIR': 'vgg16',
+ 'FEAT_STRIDE': [16],
+ 'GPU_ID': 0,
+ 'MATLAB': 'matlab',
+ 'MAX_NUM_GT_BOXES': 30,
+ 'MOBILENET': {'DEPTH_MULTIPLIER': 1.0,
+               'FIXED_LAYERS': 5,
+               'REGU_DEPTH': False,
+               'WEIGHT_DECAY': 4e-05},
+ 'PIXEL_MEANS': array([[[102.9801, 115.9465, 122.7717]]]),
+ 'POOLING_MODE': 'align',
+ 'POOLING_SIZE': 7,
+ 'RESNET': {'FIXED_BLOCKS': 1, 'MAX_POOL': False},
+ 'RNG_SEED': 3,
+ 'ROOT_DIR': '/mnt/data2/JINSU/CR-DA-DET/SW_Faster_ICR_CCR',
+ 'TEST': {'BBOX_REG': True,
+          'HAS_RPN': True,
+          'MAX_SIZE': 1000,
+          'MODE': 'nms',
+          'NMS': 0.3,
+          'PROPOSAL_METHOD': 'gt',
+          'RPN_MIN_SIZE': 16,
+          'RPN_NMS_THRESH': 0.7,
+          'RPN_POST_NMS_TOP_N': 300,
+          'RPN_PRE_NMS_TOP_N': 6000,
+          'RPN_TOP_N': 5000,
+          'SCALES': [600],
+          'SVM': False},
+ 'TRAIN': {'ASPECT_GROUPING': False,
+           'BATCH_SIZE': 256,
+           'BBOX_INSIDE_WEIGHTS': [1.0, 1.0, 1.0, 1.0],
+           'BBOX_NORMALIZE_MEANS': [0.0, 0.0, 0.0, 0.0],
+           'BBOX_NORMALIZE_STDS': [0.1, 0.1, 0.2, 0.2],
+           'BBOX_NORMALIZE_TARGETS': True,
+           'BBOX_NORMALIZE_TARGETS_PRECOMPUTED': True,
+           'BBOX_REG': True,
+           'BBOX_THRESH': 0.5,
+           'BG_THRESH_HI': 0.5,
+           'BG_THRESH_LO': 0.0,
+           'BIAS_DECAY': False,
+           'BN_TRAIN': False,
+           'DISPLAY': 10,
+           'DOUBLE_BIAS': True,
+           'FG_FRACTION': 0.25,
+           'FG_THRESH': 0.5,
+           'GAMMA': 0.1,
+           'HAS_RPN': True,
+           'IMS_PER_BATCH': 1,
+           'LEARNING_RATE': 0.001,
+           'MAX_SIZE': 1200,
+           'MOMENTUM': 0.9,
+           'PROPOSAL_METHOD': 'gt',
+           'RPN_BATCHSIZE': 256,
+           'RPN_BBOX_INSIDE_WEIGHTS': [1.0, 1.0, 1.0, 1.0],
+           'RPN_CLOBBER_POSITIVES': False,
+           'RPN_FG_FRACTION': 0.5,
+           'RPN_MIN_SIZE': 8,
+           'RPN_NEGATIVE_OVERLAP': 0.3,
+           'RPN_NMS_THRESH': 0.7,
+           'RPN_POSITIVE_OVERLAP': 0.7,
+           'RPN_POSITIVE_WEIGHT': -1.0,
+           'RPN_POST_NMS_TOP_N': 2000,
+           'RPN_PRE_NMS_TOP_N': 12000,
+           'SCALES': [600],
+           'SNAPSHOT_ITERS': 5000,
+           'SNAPSHOT_KEPT': 3,
+           'SNAPSHOT_PREFIX': 'res101_faster_rcnn',
+           'STEPSIZE': [30000],
+           'SUMMARY_INTERVAL': 180,
+           'TRIM_HEIGHT': 600,
+           'TRIM_WIDTH': 600,
+           'TRUNCATED': False,
+           'USE_ALL_GT': True,
+           'USE_FLIPPED': True,
+           'USE_GT': False,
+           'WEIGHT_DECAY': 0.0005},
+ 'USE_GPU_NMS': True}
+cityscape_2007_train_s
+**************************************************
+image_set_file: /mnt/data2/JINSU/CR-DA-DET/SW_Faster_ICR_CCR/data/cityscape/VOC2007/ImageSets/Main/train_s.txt
+**************************************************
+Loaded dataset `cityscape_2007_train_s` for training
+Set proposal method: gt
+Appending horizontally-flipped training examples...
+cityscape_2007_train_s gt roidb loaded from /mnt/data2/JINSU/CR-DA-DET/SW_Faster_ICR_CCR/data/cache/cityscape_2007_train_s_gt_roidb.pkl
+done
+Preparing training data...
+done
+**************************************************
+image_set_file: /mnt/data2/JINSU/CR-DA-DET/SW_Faster_ICR_CCR/data/cityscape/VOC2007/ImageSets/Main/train_s.txt
+**************************************************
+before filtering, there are 5950 images...
+after filtering, there are 5930 images...
+5930
+cityscape_2007_train_t
+**************************************************
+image_set_file: /mnt/data2/JINSU/CR-DA-DET/SW_Faster_ICR_CCR/data/cityscape/VOC2007/ImageSets/Main/train_t.txt
+**************************************************
+Loaded dataset `cityscape_2007_train_t` for training
+Set proposal method: gt
+Appending horizontally-flipped training examples...
+cityscape_2007_train_t gt roidb loaded from /mnt/data2/JINSU/CR-DA-DET/SW_Faster_ICR_CCR/data/cache/cityscape_2007_train_t_gt_roidb.pkl
+done
+Preparing training data...
+done
+**************************************************
+image_set_file: /mnt/data2/JINSU/CR-DA-DET/SW_Faster_ICR_CCR/data/cityscape/VOC2007/ImageSets/Main/train_t.txt
+**************************************************
+before filtering, there are 5950 images...
+after filtering, there are 5930 images...
+5930
+source 5930 target 5930 roidb entries
+Loading pretrained weights from /mnt/data2/JINSU/CR-DA-DET/DA_Faster_ICR_CCR/pre_trained_model/vgg16_caffe.pth
+Traceback (most recent call last):
+  File "dafaster_train_net_CE.py", line 607, in <module>
+    num_boxes,
+  File "/home/say2dbs/anaconda3/envs/DAF/lib/python3.6/site-packages/torch/nn/modules/module.py", line 489, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/mnt/data2/JINSU/CR-DA-DET/SW_Faster_ICR_CCR/lib/model/da_faster_rcnn/faster_rcnn.py", line 176, in forward
+    bbox_pred = self.RCNN_bbox_pred(pooled_feat)
+  File "/home/say2dbs/anaconda3/envs/DAF/lib/python3.6/site-packages/torch/nn/modules/module.py", line 489, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/say2dbs/anaconda3/envs/DAF/lib/python3.6/site-packages/torch/nn/modules/linear.py", line 67, in forward
+    return F.linear(input, self.weight, self.bias)
+  File "/home/say2dbs/anaconda3/envs/DAF/lib/python3.6/site-packages/torch/nn/functional.py", line 1352, in linear
+    ret = torch.addmm(torch.jit._unwrap_optional(bias), input, weight.t())
+RuntimeError: size mismatch, m1: [256 x 4502], m2: [4426 x 36] at /pytorch/aten/src/THC/generic/THCTensorMathBlas.cu:266

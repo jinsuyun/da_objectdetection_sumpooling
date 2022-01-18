@@ -1,0 +1,56 @@
+<annotation>
+	<folder>VOC2007</folder>
+	<filename>target_bremen_000162_000019_leftImg8bit_foggy_beta_0.02.jpg</filename>
+	<source>
+		<database>The VOC2007 Database</database>
+		<annotation>PASCAL VOC2007</annotation>
+		<image>flickr</image>
+		<flickrid>0</flickrid>
+	</source>
+	<owner>
+		<flickrid>rtz</flickrid>
+		<name>?</name>
+	</owner>
+	<size>
+		<width>2048</width>
+		<height>1024</height>
+		<deep>3</deep>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>person</name>
+		<pose>Frontal</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>981</xmin>
+			<ymin>395</ymin>
+			<xmax>994</xmax>
+			<ymax>438</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>person</name>
+		<pose>Frontal</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1105</xmin>
+			<ymin>401</ymin>
+			<xmax>1123</xmax>
+			<ymax>436</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>person</name>
+		<pose>Frontal</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1453</xmin>
+			<ymin>375</ymin>
+			<xmax>1502</xmax>
+			<ymax>507</ymax>
+		</bndbox>
+	</object>
+</annotation>

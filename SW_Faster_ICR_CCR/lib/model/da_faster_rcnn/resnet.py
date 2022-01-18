@@ -74,6 +74,45 @@ class netD_pixel(nn.Module):
             x = self.conv3(x)
             return F.sigmoid(x)
 
+class netD_pixel_CE(nn.Module):
+    def __init__(self):
+        super(netD_pixel_CE, self).__init__()
+        self.conv1 = nn.Conv2d(256, 256, kernel_size=1, stride=1, padding=0, bias=False)
+        self.bn1 = nn.BatchNorm2d(256)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = nn.Conv2d(256, 128, kernel_size=1, stride=1, padding=0, bias=False)
+        self.bn2 = nn.BatchNorm2d(128)
+        self.relu = nn.ReLU(inplace=True)
+        self.FC = nn.Linear( 5760000 ,2)
+
+        self._init_weights()
+
+    def _init_weights(self):
+        def normal_init(m, mean, stddev, truncated=False):
+            """
+        weight initalizer: truncated normal and random normal.
+        """
+            # x is a parameter
+            if truncated:
+                m.weight.data.normal_().fmod_(2).mul_(stddev).add_(
+                    mean
+                )  # not a perfect approximation
+            else:
+                m.weight.data.normal_(mean, stddev)
+                # m.bias.data.zero_()
+
+        normal_init(self.conv1, 0, 0.01)
+        normal_init(self.conv2, 0, 0.01)
+
+        #normal_init(self.conv3, 0, 0.01)
+
+    def forward(self, x):
+        x = F.relu(self.bn1(self.conv1(x)))
+        x = F.relu(self.bn2(self.conv2(x)))
+        x = x.view(x.size(0), 5760000)##############
+        x = self.FC(x)
+        x = F.softmax(x)
+        return x
 
 class netD(nn.Module):
     def __init__(self, context=False):
@@ -325,6 +364,7 @@ class resnet(_fasterRCNN):
         class_agnostic=False,
         lc=False,
         gc=False,
+        ce=False,
     ):
         self.model_path = pretrained_path
         self.dout_base_model = 1024
@@ -332,10 +372,11 @@ class resnet(_fasterRCNN):
         self.class_agnostic = class_agnostic
         self.lc = lc
         self.gc = gc
+        self.ce = ce
         self.layers = num_layers
         if not pretrained_path:
             self.model_path = pretrained_path
-        _fasterRCNN.__init__(self, classes, class_agnostic, lc, gc)
+        _fasterRCNN.__init__(self, classes, class_agnostic, lc, gc,ce)
 
     def _init_modules(self):
 
@@ -355,6 +396,7 @@ class resnet(_fasterRCNN):
         self.RCNN_base2 = nn.Sequential(resnet.layer2, resnet.layer3)
         self.netD_pixel = netD_pixel(context=self.lc)
         self.netD = netD(context=self.gc)
+        self.netD_pixel_CE = netD_pixel_CE()
 
         self.RCNN_top = nn.Sequential(resnet.layer4)
         feat_d = 2048

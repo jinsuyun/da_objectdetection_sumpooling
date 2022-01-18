@@ -15,14 +15,16 @@ from torch.autograd import Variable
 
 class vgg16(_fasterRCNN):
     def __init__(
-        self, classes, pretrained_path, pretrained=False, class_agnostic=False
+        self, classes, pretrained_path, pretrained=False, class_agnostic=False, grl=False
     ):
+        # self.model_path = pretrained_path
         self.model_path = pretrained_path
         self.dout_base_model = 512
         self.pretrained = pretrained
         self.class_agnostic = class_agnostic
+        self.grl=grl
 
-        _fasterRCNN.__init__(self, classes, class_agnostic)
+        _fasterRCNN.__init__(self, classes, class_agnostic,grl=self.grl)
 
     def _init_modules(self):
         vgg = models.vgg16()

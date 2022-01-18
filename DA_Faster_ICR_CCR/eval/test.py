@@ -8,7 +8,7 @@ import pprint
 import sys
 import time
 
-import _init_paths
+# from DA_Faster_ICR_CCR import _init_paths
 import cv2
 import numpy as np
 import torch
@@ -16,8 +16,11 @@ import torch.nn as nn
 import torch.optim as optim
 
 # from model.faster_rcnn.vgg16 import vgg16
-from model.faster_rcnn.resnet import resnet
-from model.faster_rcnn.vgg16 import vgg16
+# from model.faster_rcnn.resnet import resnet
+# from model.faster_rcnn.vgg16 import vgg16
+
+from model.da_faster_rcnn.resnet import resnet
+from model.da_faster_rcnn.vgg16 import vgg16
 
 # from model.nms.nms_wrapper import nms
 from model.roi_layers import nms
@@ -154,6 +157,21 @@ def parse_args():
         help="USE_box_cotrain",
         default=True,
         type=bool,
+    )
+
+    parser.add_argument(
+        "--grl",
+        dest="grl",
+        help="whether add grl for projection",
+        action="store_true",
+    )
+
+    parser.add_argument(
+        "--pretrained_path",
+        dest="pretrained_path",
+        help="vgg16, res101",
+        default="",
+        type=str,
     )
 
     args = parser.parse_args()
@@ -312,7 +330,7 @@ if __name__ == "__main__":
     # initilize the network here.
     if args.net == "vgg16":
         fasterRCNN = vgg16(
-            imdb.classes, pretrained=False, class_agnostic=args.class_agnostic
+            imdb.classes, pretrained_path=args.pretrained_path, pretrained=False, class_agnostic=args.class_agnostic, grl=args.grl
         )
     elif args.net == "res101":
         fasterRCNN = resnet(
@@ -335,7 +353,7 @@ if __name__ == "__main__":
     print("load checkpoint %s" % (load_name))
     checkpoint = torch.load(load_name)
     fasterRCNN.load_state_dict(
-        {k: v for k, v in checkpoint["model"].items() if k in fasterRCNN.state_dict()}
+        {k: v for k, v in checkpoint["model"].items() if k in fasterRCNN.state_dict()}, strict=False
     )
     # fasterRCNN.load_state_dict(checkpoint['model'])
     if "pooling_mode" in checkpoint.keys():
@@ -405,22 +423,90 @@ if __name__ == "__main__":
     for i in range(num_images):
 
         data = next(data_iter)
+
         im_data.data.resize_(data[0].size()).copy_(data[0])
         im_info.data.resize_(data[1].size()).copy_(data[1])
         gt_boxes.data.resize_(data[2].size()).copy_(data[2])
         num_boxes.data.resize_(data[3].size()).copy_(data[3])
 
         det_tic = time.time()
-        (
-            rois,
-            cls_prob,
-            bbox_pred,
-            rpn_loss_cls,
-            rpn_loss_box,
-            RCNN_loss_cls,
-            RCNN_loss_bbox,
-            rois_label,
-        ) = fasterRCNN(im_data, im_info, gt_boxes, num_boxes)
+        # (
+        #     rois,
+        #     cls_prob,
+        #     bbox_pred,
+        #     rpn_loss_cls,
+        #     rpn_loss_box,
+        #     RCNN_loss_cls,
+        #     RCNN_loss_bbox,
+        #     rois_label,
+        # ) = fasterRCNN(im_data, im_info, gt_boxes, num_boxes)
+
+        if args.grl:
+            fasterRCNN.zero_grad()
+            # (
+            #     rois,
+            #     cls_prob,
+            #     bbox_pred,
+            #     img_cls_loss,
+            #     rpn_loss_cls,
+            #     rpn_loss_box,
+            #     RCNN_loss_cls,
+            #     RCNN_loss_bbox,
+            #     rois_label,
+            #     DA_img_loss_cls,
+            #     DA_ins_loss_cls,
+            #     tgt_DA_img_loss_cls,
+            #     tgt_DA_ins_loss_cls,
+            #     DA_cst_loss,
+            #     tgt_DA_cst_loss,
+            #     DA_img_loss_cls_grl,
+            #     tgt_DA_img_loss_cls_grl,
+            #     matmul_DA_cst_loss,
+            #     matmul_tgt_DA_cst_loss,
+            # ) = fasterRCNN(im_data, im_info, gt_boxes, num_boxes)
+
+            (
+                rois,
+                cls_prob,
+                bbox_pred,
+                rpn_loss_cls,
+                rpn_loss_box,
+                RCNN_loss_cls,
+                RCNN_loss_bbox,
+                rois_label,
+            ) = fasterRCNN(im_data, im_info, gt_boxes, num_boxes)
+
+        else:
+            fasterRCNN.zero_grad()
+            (
+                rois,
+                cls_prob,
+                bbox_pred,
+                img_cls_loss,
+                rpn_loss_cls,
+                rpn_loss_box,
+                RCNN_loss_cls,
+                RCNN_loss_bbox,
+                rois_label,
+                DA_img_loss_cls,
+                DA_ins_loss_cls,
+                tgt_DA_img_loss_cls,
+                tgt_DA_ins_loss_cls,
+                DA_cst_loss,
+                tgt_DA_cst_loss,
+            ) = fasterRCNN(
+                im_data,
+                im_info,
+                im_cls_lb,
+                gt_boxes,
+                num_boxes,
+                need_backprop,
+                tgt_im_data,
+                tgt_im_info,
+                tgt_gt_boxes,
+                tgt_num_boxes,
+                tgt_need_backprop,
+            )
 
         scores = cls_prob.data
         boxes = rois.data[:, :, 1:5]
@@ -432,16 +518,16 @@ if __name__ == "__main__":
                 # Optionally normalize targets by a precomputed mean and stdev
                 if args.class_agnostic:
                     box_deltas = (
-                        box_deltas.view(-1, 4)
-                        * torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_STDS).cuda()
-                        + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS).cuda()
+                            box_deltas.view(-1, 4)
+                            * torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_STDS).cuda()
+                            + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS).cuda()
                     )
                     box_deltas = box_deltas.view(1, -1, 4)
                 else:
                     box_deltas = (
-                        box_deltas.view(-1, 4)
-                        * torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_STDS).cuda()
-                        + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS).cuda()
+                            box_deltas.view(-1, 4)
+                            * torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_STDS).cuda()
+                            + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS).cuda()
                     )
                     box_deltas = box_deltas.view(1, -1, 4 * len(imdb.classes))
 
@@ -470,7 +556,7 @@ if __name__ == "__main__":
                 if args.class_agnostic:
                     cls_boxes = pred_boxes[inds, :]
                 else:
-                    cls_boxes = pred_boxes[inds][:, j * 4 : (j + 1) * 4]
+                    cls_boxes = pred_boxes[inds][:, j * 4: (j + 1) * 4]
 
                 cls_dets = torch.cat((cls_boxes, cls_scores.unsqueeze(1)), 1)
                 # cls_dets = torch.cat((cls_boxes, cls_scores), 1)

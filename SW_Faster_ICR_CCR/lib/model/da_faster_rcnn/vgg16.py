@@ -79,6 +79,31 @@ class netD(nn.Module):
         else:
             return x
 
+class netD_grl(nn.Module):
+    def __init__(self, context=False):
+        super(netD, self).__init__()
+        self.conv1 = conv3x3(512, 512, stride=2)
+        self.bn1 = nn.BatchNorm2d(512)
+        self.conv2 = conv3x3(512, 128, stride=2)
+        self.bn2 = nn.BatchNorm2d(128)
+        self.conv3 = conv3x3(128, 128, stride=2)
+        self.bn3 = nn.BatchNorm2d(128)
+        self.fc = nn.Linear(128, 2)
+        self.context = context
+
+    def forward(self, x):
+        x = F.dropout(F.relu(self.bn1(self.conv1(x))), training=self.training)
+        x = F.dropout(F.relu(self.bn2(self.conv2(x))), training=self.training)
+        x = F.dropout(F.relu(self.bn3(self.conv3(x))), training=self.training)
+        x = F.avg_pool2d(x, (x.size(2), x.size(3)))
+        x = x.view(-1, 128)
+        if self.context:
+            feat = x
+        x = self.fc(x)
+        if self.context:
+            return x, feat  # torch.cat((feat1,feat2),1)#F
+        else:
+            return x
 
 class netD_dc(nn.Module):
     def __init__(self):
@@ -105,6 +130,9 @@ class vgg16(_fasterRCNN):
         class_agnostic=False,
         lc=False,
         gc=False,
+        ce=False,
+        grl=False,
+
     ):
         self.model_path = pretrained_path
         self.dout_base_model = 512
@@ -112,8 +140,11 @@ class vgg16(_fasterRCNN):
         self.class_agnostic = class_agnostic
         self.lc = lc
         self.gc = gc
+        self.ce = ce
+        self.grl = grl
 
-        _fasterRCNN.__init__(self, classes, class_agnostic, self.lc, self.gc)
+
+        _fasterRCNN.__init__(self, classes, class_agnostic, self.lc, self.gc,self.ce,self.grl)
 
     def _init_modules(self):
         vgg = models.vgg16()
@@ -140,6 +171,10 @@ class vgg16(_fasterRCNN):
             feat_d += 128
         if self.gc:
             feat_d += 128
+
+        # if self.grl:
+        #     feat_d += 128
+
         # Fix the layers before conv3:
         for layer in range(10):
             for p in self.RCNN_base1[layer].parameters():

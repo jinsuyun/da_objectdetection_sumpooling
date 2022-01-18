@@ -6,7 +6,8 @@ dataset = "cityscape"
 begin_epoch = 6
 end_epoch = 12
 
-model_prefix = "/data/experiments/DA_Faster_ICR_CCR/cityscape/model/cityscape_"
+# model_prefix = "/data/experiments/DA_Faster_ICR_CCR/cityscape/model/cityscape_"
+model_prefix = "/mnt/sdd/JINSU/CR-DA-DET/DA_Faster_ICR_CCR/cityscape/model_vgg16_DAF/cityscape_"
 
 commond = "python eval/test.py --net {} --cuda --dataset {} --part {} --model_dir {}".format(net, dataset, part, model_prefix)
 

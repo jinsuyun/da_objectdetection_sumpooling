@@ -1,0 +1,44 @@
+<annotation>
+	<folder>VOC2007</folder>
+	<filename>source_strasbourg_000001_059675_leftImg8bit.jpg</filename>
+	<source>
+		<database>The VOC2007 Database</database>
+		<annotation>PASCAL VOC2007</annotation>
+		<image>flickr</image>
+		<flickrid>0</flickrid>
+	</source>
+	<owner>
+		<flickrid>rtz</flickrid>
+		<name>?</name>
+	</owner>
+	<size>
+		<width>2048</width>
+		<height>1024</height>
+		<deep>3</deep>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>car</name>
+		<pose>Frontal</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>631</xmin>
+			<ymin>439</ymin>
+			<xmax>747</xmax>
+			<ymax>522</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>car</name>
+		<pose>Frontal</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>237</xmin>
+			<ymin>444</ymin>
+			<xmax>441</xmax>
+			<ymax>554</ymax>
+		</bndbox>
+	</object>
+</annotation>

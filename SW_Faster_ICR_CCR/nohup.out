@@ -1,0 +1,6 @@
+usage: test_cityscape.py [-h] [--model_prefix MODEL_PREFIX] [--net NET]
+                         [--gpus GPUS]
+test_cityscape.py: error: unrecognized arguments: result_txt/test_result_vgg16_DAF_GC.txt
+usage: test_cityscape.py [-h] [--model_prefix MODEL_PREFIX] [--net NET]
+                         [--gpus GPUS]
+test_cityscape.py: error: unrecognized arguments: result_txt/test_result_vgg16_DAF_GC.txt

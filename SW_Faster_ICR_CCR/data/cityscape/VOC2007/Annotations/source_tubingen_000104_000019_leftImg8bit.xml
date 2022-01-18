@@ -1,0 +1,44 @@
+<annotation>
+	<folder>VOC2007</folder>
+	<filename>source_tubingen_000104_000019_leftImg8bit.jpg</filename>
+	<source>
+		<database>The VOC2007 Database</database>
+		<annotation>PASCAL VOC2007</annotation>
+		<image>flickr</image>
+		<flickrid>0</flickrid>
+	</source>
+	<owner>
+		<flickrid>rtz</flickrid>
+		<name>?</name>
+	</owner>
+	<size>
+		<width>2048</width>
+		<height>1024</height>
+		<deep>3</deep>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>car</name>
+		<pose>Frontal</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>801</xmin>
+			<ymin>471</ymin>
+			<xmax>917</xmax>
+			<ymax>576</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>car</name>
+		<pose>Frontal</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>878</xmin>
+			<ymin>451</ymin>
+			<xmax>1089</xmax>
+			<ymax>593</ymax>
+		</bndbox>
+	</object>
+</annotation>

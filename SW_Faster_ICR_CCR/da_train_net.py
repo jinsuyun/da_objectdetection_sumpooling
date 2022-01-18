@@ -674,7 +674,7 @@ if __name__ == "__main__":
                         args.eta,
                         source_ins_da_loss,
                         target_ins_da_loss,
-                    )
+                    ),flush=True
                 )
 
                 loss_temp = 0

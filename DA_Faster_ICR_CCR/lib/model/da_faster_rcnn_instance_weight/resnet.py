@@ -17,7 +17,7 @@ model_urls = {
     "resnet18": "https://s3.amazonaws.com/pytorch/models/resnet18-5c106cde.pth",
     "resnet34": "https://s3.amazonaws.com/pytorch/models/resnet34-333f7ec4.pth",
     "resnet50": "https://s3.amazonaws.com/pytorch/models/resnet50-19c8e357.pth",
-    "resnet101": "/data/pretrained_model/resnet101_caffe.pth",
+    "resnet101": "/mnt/sdd/JINSU/CR-DA-DET/DA_Faster_ICR_CCR/pre_trained_model/resnet101_caffe.pth",
     # "resnet101": "https://s3.amazonaws.com/pytorch/models/resnet101-5d3b4d8f.pth",
     "resnet152": "https://s3.amazonaws.com/pytorch/models/resnet152-b121ed2d.pth",
 }
@@ -229,7 +229,7 @@ def resnet152(pretrained=False):
 class resnet(_fasterRCNN):
     def __init__(self, classes, num_layers=101, pretrained=False, class_agnostic=False):
         # self.model_path = "/data/ztc/detectionModel/resnet101_caffe.pth"
-        self.model_path = "/data/pretrained_model/resnet101_caffe.pth"
+        self.model_path = "/mnt/sdd/JINSU/CR-DA-DET/DA_Faster_ICR_CCR/pre_trained_model/resnet101_caffe.pth"
         self.dout_base_model = 1024
         self.pretrained = pretrained
         self.class_agnostic = class_agnostic

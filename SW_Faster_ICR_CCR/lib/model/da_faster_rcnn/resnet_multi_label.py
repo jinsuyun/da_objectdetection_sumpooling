@@ -76,6 +76,8 @@ class netD_pixel(nn.Module):
             return F.sigmoid(x)
 
 
+
+
 class netD(nn.Module):
     def __init__(self, context=False):
         super(netD, self).__init__()
